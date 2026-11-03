@@ -79,6 +79,7 @@ Host <이름>
 | 노트북 → 파이 파일 복사 | `scp 파일 <이름>:~/urgent/models/` |
 | 파이 → 노트북 파일 복사 | `scp <이름>:~/파일 .` |
 | 파이 안전 종료 | 접속 후 `sudo shutdown -h now` (전원선을 바로 뽑지 않는다) |
+| 긴 스크립트 보내기 | 터미널에 붙여 넣지 말고 파일로 만들어 `scp`로 전송 (붙여 넣으면 중간이 사라진 적이 있음) |
 
 ### 4-3. 막혔을 때
 
@@ -131,3 +132,23 @@ git --version; make --version | head -1; dtc --version
 | 저장 관리 | 오래된 클립 삭제 규칙, 디스크 여유 점검 |
 | 전달 | 앱 쪽 방식 확정 필요 ([08_TEAM_SHARING](08_TEAM_SHARING.md)) |
 | 안정성 | 부팅 시 자동 시작, 전송 실패 시 재시도, 시각 동기화 확인 |
+
+## 7. 가짜 실시간 감지기 (`code/scripts/detector.py`)
+
+wav 파일을 마이크처럼 0.5초씩 흘려 보내고, 최근 2.5초를 판단하는 프로그램이다. 입력을 마이크로 바꾸면 그대로 실제 감지기의 뼈대가 된다.
+
+```bash
+source ~/urgent/venv/bin/activate
+python ~/urgent/detector.py ~/urgent/streams/stream_urg_first10min.wav \
+  --truth ~/urgent/streams/stream_urg_first10min_truth.json \
+  --compare ~/urgent/streams/probs_v1_speech_hop0.50.npz
+```
+- 규칙은 `--theta`(기준값), `--n`(연속 횟수), `--gate`(소리 크기 하한 dBFS), `--cooldown`(쉬는 시간)으로 바꾼다.
+- 스트림 파일(`stream_urg_first10min.*`, `probs_*.npz`)은 코랩 노트북 D가 드라이브 `LAB/streams`에 만든다.
+
+### 실행 결과 (파이4, 1스레드, 2026-11-03)
+| 항목 | 값 |
+|---|---|
+| 판단 한 번 | 평균 21.5ms, p95 22.5ms, 실시간의 4.3% |
+| 코랩과의 확률 차이 | 최대 1.84e-03 (시각 차이 0) → 원인 미확인, [07](07_ROADMAP.md) A1b |
+| 임시 규칙(기준값 0.95, 연속 3회, 쉼 10초) | 경보 8번, 위급 문장 18개 중 5개 감지(28%), 지연 중앙값 2.4초, 문장 밖 경보 2번 |
