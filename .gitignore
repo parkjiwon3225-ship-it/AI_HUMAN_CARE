@@ -1,0 +1,35 @@
+# data and model artifacts are NOT committed (AI Hub terms restrict redistribution; files are large)
+*.npy
+*.npz
+*.wav
+*.flac
+*.mp3
+*.m4a
+*.zip
+*.tar
+*.tar.gz
+*.pt
+*.pth
+*.onnx
+*.csv
+data/
+processed16k/
+speech16k/
+listen/
+listen16k/
+models/
+
+# secrets and local settings
+.env
+*.pem
+*.key
+id_*
+.ssh/
+config.local*
+
+# python / notebooks
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+venv/
+.venv/
