@@ -13,7 +13,8 @@
 | A (CPU) | `cell_A1_connect_drive.py` → `cell_05_speech_data_v3.py` |
 | B (CPU 또는 GPU) | `cell_01` → `cell_02` → `cell_03` → `cell_04b` → `cell_05` → `cell_06a` → `cell_06b` → (GPU) `cell_07a` → `07b` → `07c` → `07d` |
 | C (CPU) | `cell_P0_connect_install.py` → `cell_P1_export_onnx.py` |
-| D (CPU) 스트리밍 평가 | `cell_S0` → `S1` → `S2` → `S3` → `S4` → `S5` → `S6` (`cell_S*_*.py`). S0, S1 다음 S2부터 순서대로 |
+| B (GPU) v2 학습 | 1 → 2 → 3 → 4b → 5 → 6a → 7a → `cell_8a` → `8b` → `8c` → `8c2` → `8d` (8d는 먼저 `SMOKE = True`로 시험) |
+| D (CPU) 스트리밍 평가 | `cell_S0` → `S1` → `S2` → `S3` → `S4` → `S5` → `S6` (`cell_S*_*.py`). 모델 비교는 S0 → S1 → `cell_E1_compare_models.py` |
 
 - `cell_A1`, `cell_P0`에는 코랩 전용 `!pip` 명령이 있어서 일반 파이썬으로는 실행되지 않습니다.
 - `cell_04_train_v0.py`는 v0 학습 셀(참고용, 이미 저장된 결과가 있으면 실행하지 않음).

@@ -152,3 +152,29 @@ python ~/urgent/detector.py ~/urgent/streams/stream_urg_first10min.wav \
 | 판단 한 번 | 평균 21.5ms, p95 22.5ms, 실시간의 4.3% |
 | 코랩과의 확률 차이 | 최대 1.84e-03 (시각 차이 0) → 원인 미확인, [07](07_ROADMAP.md) A1b |
 | 임시 규칙(기준값 0.95, 연속 3회, 쉼 10초) | 경보 8번, 위급 문장 18개 중 5개 감지(28%), 지연 중앙값 2.4초, 문장 밖 경보 2번 |
+
+## 8. 감지 서비스 (`code/scripts/urgent_service.py`)
+
+`detector.py`에 **판단 규칙, 앞뒤 10초 클립 저장, 앱용 JSON, 저장 관리**를 붙인 프로그램이다.
+
+```bash
+source ~/urgent/venv/bin/activate
+python ~/urgent/urgent_service.py --wav ~/urgent/streams/stream_urg_first10min.wav            # 마이크 없이 파일 재생
+python ~/urgent/urgent_service.py --mic plughw:<카드번호>,0 --channels 2                      # 마이크 (도착 후 확인)
+```
+- 값 바꾸기: `--set theta=0.99 --set n=2` 또는 `--config 파일.json`. 키: `theta, n, gate_dbfs, cooldown_s, hop_s, pre_s, post_s, device_id, model_name, model_file, model_dir, out_dir, max_clips, min_free_mb, threads`.
+- 결과: `out_dir`(기본 `~/urgent/events`)에 `evt_<시각>_<번호>.wav`(20초, 16kHz 모노), `.json`, `events.jsonl`.
+- JSON 항목: `event_id, device_id, detected_at(+09:00), time_synced, model{name, threshold, consecutive, gate_dbfs}, score{max_prob, mean_prob}, clip{file, sample_rate, channels, pre_sec, post_sec, bytes, complete}, speaker(null)`. 형식은 팀 협의 후 바뀔 수 있다 ([08](08_TEAM_SHARING.md)).
+- 스트림 맨 앞이면 앞 구간이 10초보다 짧게, 입력이 먼저 끝나면 `complete: false`로 저장한다.
+- 저장 개수 제한(`max_clips`)을 넘으면 오래된 것부터 지우고, 디스크가 `min_free_mb`보다 적으면 저장을 건너뛴다.
+- **마이크 입력은 `arecord` 대신 파일을 파이프로 흘려서 확인**했고 실제 마이크는 도착 후 확인한다. 스테레오는 평균해서 모노로 쓴다.
+
+### 후보 모델 실행 결과 (파이4, 1스레드, 10분 스트림)
+| 모델 | 규칙 | 판단 한 번 | 경보 |
+|---|---|---|---|
+| v1 (기준값 0.95, 연속 3회) | | 42.1ms(4스레드 기본값) → 23.1ms(1스레드) | 8번 |
+| v2_wide | 0.999, 연속 1회 | 54.7ms (실시간의 약 11%) | 9번 |
+| v2_no_part | 0.99, 연속 2회 | 23.1ms (약 4.6%) | 8번 |
+
+- 두 후보의 경보 시각이 거의 겹친다. 정식 비교는 60분 스트림의 [04 §9](04_MODEL_EXPERIMENTS.md).
+- ONNX 스레드는 1개로 고정한다(4개가 기본값이면 판단이 약 2배 느렸다).
