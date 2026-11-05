@@ -40,7 +40,7 @@ pip install --upgrade pip
 pip install numpy scipy soundfile onnxruntime
 ```
 
-- 모델 파일 3개(`urgent_v1_speech.onnx`, `mel_fb.npy`, `urgent_v1_speech_config.json`)는 코랩에서 만들고(`code/colab/cell_P1`), 노트북을 거쳐 파이로 복사한다 (`scp`, 아래).
+- 모델 파일 3개(`urgent_v1_speech.onnx`, `mel_fb.npy`, `urgent_v1_speech_config.json`)는 코랩에서 만들고(`code/colab/cell_P1_export_onnx.py`), 노트북을 거쳐 파이로 복사한다 (`scp`, 아래).
 - 속도 측정: `code/scripts/bench.py`를 `~/urgent/bench.py`로 두고 `python ~/urgent/bench.py`.
 
 ## 3. 속도 측정 결과 (모델 238.5KB)
